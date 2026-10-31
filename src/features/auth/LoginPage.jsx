@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { Lock, Mail, Store, ArrowRight, Loader2, Eye, EyeOff, ShieldCheck, Sparkles } from 'lucide-react';
+import { Lock, Mail, Store, ArrowRight, Loader2, Eye, EyeOff, ShieldCheck, Sparkles, CheckCircle2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import useAuthStore from '../../store/authStore';
 
@@ -13,7 +13,6 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  // Demo logic refs and params
   const isDemo = searchParams.get('demo') === 'true';
   const hasAutoLoggedIn = useRef(false);
 
@@ -25,14 +24,11 @@ const LoginPage = () => {
     if (res.success) {
       toast.success(isDemo ? 'Welcome to the Live Demo!' : 'Welcome back!');
       
-      // ✅ SMART REDIRECT LOGIC (LocalStorage se User nikalein)
       const loggedInUser = JSON.parse(localStorage.getItem('user'));
       
       if (loggedInUser?.role === 'super_admin' || loggedInUser?.isDemo || loggedInUser?.role === 'demo') {
-        // Agar Super Admin ya Demo hai, toh Master Panel bhejein
         window.location.href = '/secret-master-control/overview';
       } else {
-        // Normal user (Cashier, Manager) ko POS bhejein
         window.location.href = '/app/dashboard'; 
       }
     } else {
@@ -40,116 +36,145 @@ const LoginPage = () => {
     }
   };
 
-  // ✅ Auto-login effect for Demo Mode (Fixed Credentials)
   useEffect(() => {
     if (isDemo && !hasAutoLoggedIn.current) {
-      setEmail('demo@globalpos.com');  // ✅ Real Demo Account
-      setPassword('demo1234');          // ✅ Real Demo Password
+      setEmail('demo@globalpos.com');
+      setPassword('demo1234');
       hasAutoLoggedIn.current = true;
-
-      // Slight delay to let the UI update with the filled credentials
-      const timer = setTimeout(() => {
-        handleSubmit();
-      }, 600);
-
+      const timer = setTimeout(() => handleSubmit(), 600);
       return () => clearTimeout(timer);
     }
-  }, [isDemo]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isDemo]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#f8fafc] p-4 relative overflow-hidden">
+    <div className="min-h-screen flex bg-white">
       
-      {/* Background Decoration */}
-      <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-teal-50 to-transparent"></div>
-      <div className="absolute -top-32 -left-32 w-96 h-96 bg-teal-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50"></div>
-      <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50"></div>
+      {/* LEFT SIDE - BRANDING (Hidden on small screens) */}
+      <div className="hidden lg:flex w-1/2 bg-[#0f766e] flex-col justify-between p-12 relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute top-0 left-0 w-full h-full opacity-10">
+          <div className="absolute -top-24 -left-24 w-96 h-96 bg-white rounded-full mix-blend-overlay filter blur-3xl"></div>
+          <div className="absolute bottom-12 right-12 w-72 h-72 bg-teal-300 rounded-full mix-blend-overlay filter blur-3xl"></div>
+        </div>
 
-      <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden relative z-10 border border-slate-100">
+        <div className="relative z-10">
+          <div className="flex items-center gap-3 text-white mb-16">
+            <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg">
+              <Store size={28} className="text-[#0f766e]" />
+            </div>
+            <span className="text-2xl font-black tracking-wide">POSFlow</span>
+          </div>
+
+          <h1 className="text-4xl font-bold text-white leading-tight mb-6">
+            Manage your entire retail business from one place.
+          </h1>
+          <p className="text-teal-100 text-lg mb-8 max-w-md">
+            The ultimate cloud-based POS system designed for modern retail stores. Track sales, manage inventory, and grow faster.
+          </p>
+
+          <div className="space-y-4">
+            {['Multi-Branch Management', 'Real-time Inventory Tracking', 'Detailed Analytics & Reports', 'Secure & Reliable'].map((feature, i) => (
+              <div key={i} className="flex items-center gap-3 text-white">
+                <CheckCircle2 size={20} className="text-teal-300" />
+                <span className="font-medium">{feature}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="relative z-10 text-teal-200 text-sm flex items-center gap-2">
+          <ShieldCheck size={16} /> Enterprise-grade security
+        </div>
+      </div>
+
+      {/* RIGHT SIDE - FORM */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12 relative">
         
-        {/* Demo Mode Badge */}
         {isDemo && (
-          <div className="absolute top-0 right-0 bg-teal-500 text-white text-[10px] font-bold px-3 py-1.5 rounded-bl-xl flex items-center gap-1 shadow-sm uppercase tracking-wider z-20">
-            <Sparkles size={12} /> Demo Mode
+          <div className="absolute top-6 right-6 bg-teal-50 text-teal-700 text-xs font-bold px-4 py-2 rounded-full flex items-center gap-2 border border-teal-200 animate-pulse">
+            <Sparkles size={14} /> Demo Mode Active
           </div>
         )}
 
-        {/* Header */}
-        <div className="px-8 pt-10 pb-6 text-center bg-gradient-to-b from-slate-50 to-white border-b border-slate-100 relative">
-          <div className="w-16 h-16 bg-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-teal-500/30">
-            <Store size={32} className="text-white" />
-          </div>
-          <h1 className="text-2xl font-black text-slate-900">POSFlow</h1>
-          <p className="text-slate-500 text-sm mt-1">Sign in to manage your store</p>
-        </div>
-
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-8 space-y-5">
+        <div className="w-full max-w-md">
           
-          <div>
-            <label className="block text-sm font-bold text-slate-700 mb-1.5">Email Address</label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-3.5 text-slate-400" size={18} />
-              <input 
-                type="email" 
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl py-3 pl-10 pr-4 text-sm outline-none focus:border-teal-500 focus:bg-white transition-all text-slate-800" 
-                placeholder="admin@globalpos.com"
-              />
+          {/* Mobile Logo */}
+          <div className="lg:hidden flex items-center justify-center gap-3 mb-8">
+            <div className="w-12 h-12 bg-[#0f766e] rounded-xl flex items-center justify-center shadow-lg">
+              <Store size={28} className="text-white" />
             </div>
+            <span className="text-2xl font-black text-slate-900">POSFlow</span>
           </div>
 
-          <div>
-            <label className="block text-sm font-bold text-slate-700 mb-1.5">Password</label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-3.5 text-slate-400" size={18} />
-              <input 
-                type={showPassword ? "text" : "password"} 
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl py-3 pl-10 pr-10 text-sm outline-none focus:border-teal-500 focus:bg-white transition-all text-slate-800" 
-                placeholder="••••••••"
-              />
-              <button 
-                type="button" 
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-3.5 text-slate-400 hover:text-slate-600"
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
+          <div className="text-center lg:text-left mb-8">
+            <h2 className="text-3xl font-bold text-slate-900 mb-2">Welcome back</h2>
+            <p className="text-slate-500">Please enter your details to sign in.</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label className="block text-sm font-bold text-slate-700 mb-2">Email Address</label>
+              <div className="relative">
+                <Mail className="absolute left-4 top-3.5 text-slate-400" size={20} />
+                <input 
+                  type="email" 
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-12 pr-4 text-sm outline-none focus:border-[#0f766e] focus:bg-white focus:ring-4 focus:ring-teal-500/10 transition-all text-slate-800" 
+                  placeholder="admin@globalpos.com"
+                />
+              </div>
             </div>
+
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <label className="block text-sm font-bold text-slate-700">Password</label>
+                <Link to="/forgot-password" className="text-xs text-[#0f766e] font-bold hover:underline">Forgot password?</Link>
+              </div>
+              <div className="relative">
+                <Lock className="absolute left-4 top-3.5 text-slate-400" size={20} />
+                <input 
+                  type={showPassword ? "text" : "password"} 
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-12 pr-12 text-sm outline-none focus:border-[#0f766e] focus:bg-white focus:ring-4 focus:ring-teal-500/10 transition-all text-slate-800" 
+                  placeholder="••••••••"
+                />
+                <button 
+                  type="button" 
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-3.5 text-slate-400 hover:text-slate-600"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+            </div>
+
+            <div className="flex items-center">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" className="w-4 h-4 rounded border-slate-300 text-[#0f766e] focus:ring-[#0f766e]" />
+                <span className="text-sm text-slate-600 font-medium">Remember for 30 days</span>
+              </label>
+            </div>
+
+            <button 
+              type="submit" 
+              disabled={isLoading}
+              className="w-full bg-[#0f766e] hover:bg-[#115e59] disabled:opacity-50 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-teal-500/30 transition-all flex items-center justify-center gap-2 mt-4"
+            >
+              {isLoading ? <Loader2 className="animate-spin" size={20} /> : <><span>Sign In</span> <ArrowRight size={18}/></>}
+            </button>
+          </form>
+
+          <div className="mt-8 text-center">
+            <p className="text-slate-600 text-sm">
+              Don't have an account?{' '}
+              <Link to="/signup" className="text-[#0f766e] font-bold hover:underline">Create an account</Link>
+            </p>
           </div>
 
-          <div className="flex items-center justify-between text-sm pt-1">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" className="w-4 h-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500" />
-              <span className="text-slate-600 font-medium">Remember me</span>
-            </label>
-            
-            <Link to="/forgot-password" className="text-teal-600 font-bold hover:underline">Forgot password?</Link>
-          </div>
-
-          <button 
-            type="submit" 
-            disabled={isLoading}
-            className="w-full bg-[#0f766e] hover:bg-[#115e59] disabled:opacity-50 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-teal-500/20 transition flex items-center justify-center gap-2 mt-2"
-          >
-            {isLoading ? <Loader2 className="animate-spin" size={20} /> : <><span>Sign In</span> <ArrowRight size={18}/></>}
-          </button>
-        </form>
-
-        {/* Footer */}
-        <div className="px-8 py-4 bg-slate-50 border-t border-slate-100 flex flex-col items-center justify-center gap-2 text-sm">
-          <div className="flex items-center text-slate-500">
-            <span>Don't have an account? </span>
-            <Link to="/signup" className="text-teal-600 font-bold hover:underline ml-1">Create one</Link>
-          </div>
-          <div className="flex items-center gap-1 text-[11px] text-slate-400 mt-1">
-            <ShieldCheck size={12} className="text-teal-600" />
-            <span>Secure Login powered by POSFlow</span>
-          </div>
         </div>
       </div>
     </div>

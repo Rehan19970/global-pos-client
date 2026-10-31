@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Store, User, Mail, Lock, Loader2, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Store, User, Mail, Lock, Loader2, ArrowRight, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import api from '../../lib/api';
 
@@ -14,16 +14,21 @@ const Signup = () => {
     password: ''
   });
 
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     
     try {
-      // Backend API call
       const { data } = await api.post('/auth/register-store', formData);
       
-      toast.success('Account created successfully! Please login.');
-      navigate('/login');
+      if (data.success) {
+        toast.success('Account created successfully! Please login.');
+        navigate('/login');
+      }
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to create account');
     } finally {
@@ -32,86 +37,130 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#f8fafc] p-4 relative overflow-hidden">
-      <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-teal-50 to-transparent"></div>
+    <div className="min-h-screen flex bg-white">
       
-      <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden relative z-10 border border-slate-100">
-        <div className="px-8 pt-10 pb-6 text-center bg-gradient-to-b from-slate-50 to-white border-b border-slate-100">
-          <div className="w-16 h-16 bg-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-teal-500/30">
-            <Store size={32} className="text-white" />
-          </div>
-          <h1 className="text-2xl font-black text-slate-900">Create your Store</h1>
-          <p className="text-slate-500 text-sm mt-1">Start managing your business in minutes</p>
+      {/* LEFT SIDE - BRANDING (Hidden on small screens) */}
+      <div className="hidden lg:flex w-1/2 bg-[#0f766e] flex-col justify-between p-12 relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute top-0 left-0 w-full h-full opacity-10">
+          <div className="absolute -top-24 -left-24 w-96 h-96 bg-white rounded-full mix-blend-overlay filter blur-3xl"></div>
+          <div className="absolute bottom-12 right-12 w-72 h-72 bg-teal-300 rounded-full mix-blend-overlay filter blur-3xl"></div>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-8 space-y-4">
-          <div>
-            <label className="block text-sm font-bold text-slate-700 mb-1">Store Name</label>
-            <div className="relative">
-              <Store className="absolute left-3 top-3.5 text-slate-400" size={18} />
-              <input 
-                type="text" required
-                value={formData.storeName}
-                onChange={(e) => setFormData({...formData, storeName: e.target.value})}
-                className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl py-3 pl-10 pr-4 text-sm outline-none focus:border-teal-500 focus:bg-white transition-all text-slate-800" 
-                placeholder="e.g. FreshMart Superstore"
-              />
+        <div className="relative z-10">
+          <div className="flex items-center gap-3 text-white mb-16">
+            <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg">
+              <Store size={28} className="text-[#0f766e]" />
             </div>
+            <span className="text-2xl font-black tracking-wide">POSFlow</span>
           </div>
 
-          <div>
-            <label className="block text-sm font-bold text-slate-700 mb-1">Owner Name</label>
-            <div className="relative">
-              <User className="absolute left-3 top-3.5 text-slate-400" size={18} />
-              <input 
-                type="text" required
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl py-3 pl-10 pr-4 text-sm outline-none focus:border-teal-500 focus:bg-white transition-all text-slate-800" 
-                placeholder="e.g. Ali Khan"
-              />
+          <h1 className="text-4xl font-bold text-white leading-tight mb-6">
+            Start your journey with POSFlow today.
+          </h1>
+          <p className="text-teal-100 text-lg mb-8 max-w-md">
+            Join thousands of retailers who are scaling their business with our cloud POS system.
+          </p>
+
+          <div className="space-y-4">
+            {['Free 14-day trial', 'No credit card required', 'Cancel anytime', '24/7 customer support'].map((feature, i) => (
+              <div key={i} className="flex items-center gap-3 text-white">
+                <CheckCircle2 size={20} className="text-teal-300" />
+                <span className="font-medium">{feature}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="relative z-10 text-teal-200 text-sm flex items-center gap-2">
+          <ShieldCheck size={16} /> Enterprise-grade security
+        </div>
+      </div>
+
+      {/* RIGHT SIDE - FORM */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12 overflow-y-auto max-h-screen">
+        <div className="w-full max-w-md py-8">
+          
+          {/* Mobile Logo */}
+          <div className="lg:hidden flex items-center justify-center gap-3 mb-8">
+            <div className="w-12 h-12 bg-[#0f766e] rounded-xl flex items-center justify-center shadow-lg">
+              <Store size={28} className="text-white" />
             </div>
+            <span className="text-2xl font-black text-slate-900">POSFlow</span>
           </div>
 
-          <div>
-            <label className="block text-sm font-bold text-slate-700 mb-1">Email Address</label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-3.5 text-slate-400" size={18} />
-              <input 
-                type="email" required
-                value={formData.email}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
-                className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl py-3 pl-10 pr-4 text-sm outline-none focus:border-teal-500 focus:bg-white transition-all text-slate-800" 
-                placeholder="admin@store.com"
-              />
-            </div>
+          <div className="text-center lg:text-left mb-8">
+            <h2 className="text-3xl font-bold text-slate-900 mb-2">Create your store</h2>
+            <p className="text-slate-500">Get started for free. No credit card required.</p>
           </div>
 
-          <div>
-            <label className="block text-sm font-bold text-slate-700 mb-1">Password</label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-3.5 text-slate-400" size={18} />
-              <input 
-                type="password" required minLength="6"
-                value={formData.password}
-                onChange={(e) => setFormData({...formData, password: e.target.value})}
-                className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl py-3 pl-10 pr-4 text-sm outline-none focus:border-teal-500 focus:bg-white transition-all text-slate-800" 
-                placeholder="Min 6 characters"
-              />
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-bold text-slate-700 mb-2">Store Name</label>
+              <div className="relative">
+                <Store className="absolute left-4 top-3.5 text-slate-400" size={20} />
+                <input 
+                  type="text" name="storeName" required
+                  value={formData.storeName} onChange={handleChange}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-12 pr-4 text-sm outline-none focus:border-[#0f766e] focus:bg-white focus:ring-4 focus:ring-teal-500/10 transition-all text-slate-800" 
+                  placeholder="e.g. FreshMart Superstore"
+                />
+              </div>
             </div>
+
+            <div>
+              <label className="block text-sm font-bold text-slate-700 mb-2">Owner Name</label>
+              <div className="relative">
+                <User className="absolute left-4 top-3.5 text-slate-400" size={20} />
+                <input 
+                  type="text" name="name" required
+                  value={formData.name} onChange={handleChange}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-12 pr-4 text-sm outline-none focus:border-[#0f766e] focus:bg-white focus:ring-4 focus:ring-teal-500/10 transition-all text-slate-800" 
+                  placeholder="e.g. Ali Khan"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-bold text-slate-700 mb-2">Email Address</label>
+              <div className="relative">
+                <Mail className="absolute left-4 top-3.5 text-slate-400" size={20} />
+                <input 
+                  type="email" name="email" required
+                  value={formData.email} onChange={handleChange}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-12 pr-4 text-sm outline-none focus:border-[#0f766e] focus:bg-white focus:ring-4 focus:ring-teal-500/10 transition-all text-slate-800" 
+                  placeholder="admin@store.com"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-bold text-slate-700 mb-2">Password</label>
+              <div className="relative">
+                <Lock className="absolute left-4 top-3.5 text-slate-400" size={20} />
+                <input 
+                  type="password" name="password" required minLength="6"
+                  value={formData.password} onChange={handleChange}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-12 pr-4 text-sm outline-none focus:border-[#0f766e] focus:bg-white focus:ring-4 focus:ring-teal-500/10 transition-all text-slate-800" 
+                  placeholder="Min 6 characters"
+                />
+              </div>
+            </div>
+
+            <button 
+              type="submit" disabled={isLoading}
+              className="w-full bg-[#0f766e] hover:bg-[#115e59] disabled:opacity-50 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-teal-500/30 transition-all flex items-center justify-center gap-2 mt-6"
+            >
+              {isLoading ? <Loader2 className="animate-spin" size={20} /> : <><span>Create Account</span> <ArrowRight size={18}/></>}
+            </button>
+          </form>
+
+          <div className="mt-8 text-center">
+            <p className="text-slate-600 text-sm">
+              Already have an account?{' '}
+              <Link to="/login" className="text-[#0f766e] font-bold hover:underline">Sign in</Link>
+            </p>
           </div>
-
-          <button 
-            type="submit" disabled={isLoading}
-            className="w-full bg-[#0f766e] hover:bg-[#115e59] disabled:opacity-50 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-teal-500/20 transition flex items-center justify-center gap-2 mt-4"
-          >
-            {isLoading ? <Loader2 className="animate-spin" size={20} /> : <><span>Create Account</span> <ArrowRight size={18}/></>}
-          </button>
-        </form>
-
-        <div className="px-8 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-center text-sm">
-          <span className="text-slate-500">Already have an account? </span>
-          <Link to="/login" className="text-teal-600 font-bold hover:underline ml-1">Log In</Link>
         </div>
       </div>
     </div>
