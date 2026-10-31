@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>POSFlow - Enterprise POS</title>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <!-- Google Translate ka chhupa hua widget (display:none nahi karna, warna dropdown nahi banta) -->
+    <div id="google_translate_element" style="position: absolute; top: -9999px; left: -9999px; z-index: -1;"></div>
+
+    <!-- Callback function pehle define hoga, phir script load hogi (div ke BAAD) -->
+    <script type="text/javascript">
+      function googleTranslateElementInit() {
+        new google.translate.TranslateElement(
+          {
+            pageLanguage: 'en',
+            includedLanguages: 'en,ur,ar,hi,bn,fa,tr,fr,es,de,zh,ru,id,ms,ja,pt,it,th',
+            layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+            autoDisplay: false,
+          },
+          'google_translate_element'
+        );
+      }
+    </script>
+    <script
+      type="text/javascript"
+      src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
+    ></script>
+
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
