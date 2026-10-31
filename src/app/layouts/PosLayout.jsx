@@ -41,11 +41,9 @@ const PosLayout = () => {
     setDeferredPrompt(null);
   };
 
-  // 🚨 Global View Check (Sirf Main Super Admin ke liye)
   const isGlobalView = user?.role === 'super_admin' && !selectedBranch;
 
   useEffect(() => {
-    // ✅ Update: store_admin aur manager bhi branches fetch kar sakein
     if (user?.role === 'super_admin' || user?.role === 'store_admin' || user?.role === 'manager') {
       fetchBranches();
     }
@@ -90,19 +88,19 @@ const PosLayout = () => {
   ];
 
   return (
-    <div className="flex h-screen bg-[#e2e8f0] overflow-hidden p-4 gap-4">
+    <div className="flex h-screen bg-slate-100 overflow-hidden p-4 gap-4">
       
-      {/* SIDEBAR */}
-      <aside className="w-64 bg-[#243b5e] text-white rounded-3xl flex flex-col shadow-xl h-full py-4">
+      {/* SIDEBAR - Master Admin Style */}
+      <aside className="w-64 bg-[#1e1b4b] text-white flex flex-col shadow-2xl h-full py-4 border-r border-indigo-900/50 rounded-3xl overflow-hidden">
         
         {/* ✅ ROSHYS Logo Area */}
-        <div className="flex items-center px-6 mb-6">
-          <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center mr-3 shadow-lg overflow-hidden p-0.5">
-            <img src="/pwa-192x192.png" alt="ROSHYS Logo" className="w-full h-full object-contain rounded-full" />
+        <div className="flex items-center px-6 mb-8 mt-2">
+          <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center mr-3 shadow-lg overflow-hidden p-1">
+            <img src="/logo.svg" alt="ROSHYS Logo" className="w-full h-full object-contain" />
           </div>
           <div>
             <h1 className="text-xl font-bold tracking-tight">ROSHYS</h1>
-            <p className="text-[10px] text-blue-200 font-medium tracking-widest">POS SYSTEM</p>
+            <p className="text-[10px] text-indigo-300 font-medium tracking-widest uppercase">POS SYSTEM</p>
           </div>
         </div>
 
@@ -110,33 +108,33 @@ const PosLayout = () => {
         <div className="flex-1 px-3 space-y-4 overflow-y-auto custom-scrollbar">
           
           {isGlobalView && (
-            <div className="bg-blue-900/50 border border-blue-700/50 rounded-xl p-3 mx-1 mb-2">
-              <p className="text-[10px] text-blue-200 font-bold uppercase tracking-wider mb-1">Global View</p>
-              <p className="text-xs text-blue-100 leading-tight">Select a specific branch to manage data.</p>
+            <div className="bg-indigo-900/50 border border-indigo-700/50 rounded-xl p-3 mx-1 mb-2">
+              <p className="text-[10px] text-indigo-200 font-bold uppercase tracking-wider mb-1">Global View</p>
+              <p className="text-xs text-indigo-100 leading-tight">Select a specific branch to manage data.</p>
             </div>
           )}
 
           {/* Main Menu */}
           <div>
-            <p className="text-[11px] font-bold text-blue-300/70 uppercase tracking-wider mb-2 px-3">Main Menu</p>
-            <nav className="space-y-[2px]">
+            <p className="text-[11px] font-bold text-indigo-300/70 uppercase tracking-wider mb-2 px-3">Main Menu</p>
+            <nav className="space-y-1">
               {mainMenu.map((item) => {
                 const isActive = location.pathname.startsWith(item.path);
                 return (
                   <Link
                     key={item.path}
                     to={item.path}
-                    className={`flex items-center justify-between py-2 px-3 rounded-lg transition-all duration-200 ${
+                    className={`flex items-center justify-between py-2.5 px-3 rounded-xl transition-all duration-200 ${
                       isActive 
-                        ? 'bg-[#3b5f8f] text-white shadow-sm' 
-                        : 'text-blue-100 hover:bg-white/5'
+                        ? 'bg-indigo-600 text-white shadow-md' 
+                        : 'text-indigo-200 hover:bg-white/5 hover:text-white'
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <item.icon size={18} className={isActive ? 'text-white' : 'text-blue-300'} />
+                      <item.icon size={18} className={isActive ? 'text-white' : 'text-indigo-400'} />
                       <span className="font-medium text-[13px]">{item.name}</span>
                     </div>
-                    {isActive && <div className="w-1.5 h-1.5 rounded-full bg-blue-300"></div>}
+                    {isActive && <div className="w-1.5 h-1.5 rounded-full bg-indigo-300"></div>}
                   </Link>
                 );
               })}
@@ -145,21 +143,21 @@ const PosLayout = () => {
 
           {/* Settings Menu */}
           <div className="pb-4">
-            <p className="text-[11px] font-bold text-blue-300/70 uppercase tracking-wider mb-2 px-3">Settings</p>
-            <nav className="space-y-[2px]">
+            <p className="text-[11px] font-bold text-indigo-300/70 uppercase tracking-wider mb-2 px-3">Settings</p>
+            <nav className="space-y-1">
               {settingsMenu.map((item) => {
                 const isActive = location.pathname.startsWith(item.path);
                 return (
                   <Link
                     key={item.path}
                     to={item.path}
-                    className={`flex items-center gap-3 py-2 px-3 rounded-lg transition-all duration-200 ${
+                    className={`flex items-center gap-3 py-2.5 px-3 rounded-xl transition-all duration-200 ${
                       isActive 
-                        ? 'bg-[#3b5f8f] text-white shadow-sm' 
-                        : 'text-blue-100 hover:bg-white/5'
+                        ? 'bg-indigo-600 text-white shadow-md' 
+                        : 'text-indigo-200 hover:bg-white/5 hover:text-white'
                     }`}
                   >
-                    <item.icon size={18} className={isActive ? 'text-white' : 'text-blue-300'} />
+                    <item.icon size={18} className={isActive ? 'text-white' : 'text-indigo-400'} />
                     <span className="font-medium text-[13px]">{item.name}</span>
                   </Link>
                 );
@@ -167,42 +165,40 @@ const PosLayout = () => {
             </nav>
           </div>
 
-          {/* ✅ Branches Menu (Ab store_admin aur manager ko bhi dikhega) */}
+          {/* Branches Menu */}
           {(user?.role === 'super_admin' || user?.role === 'store_admin' || user?.role === 'manager') && (
-            <div className="pb-4 border-t border-blue-900/50 pt-4">
-              <p className="text-[11px] font-bold text-blue-300/70 uppercase tracking-wider mb-2 px-3">Administration</p>
-              <nav className="space-y-[2px]">
+            <div className="pb-4 border-t border-indigo-900/50 pt-4">
+              <p className="text-[11px] font-bold text-indigo-300/70 uppercase tracking-wider mb-2 px-3">Administration</p>
+              <nav className="space-y-1">
                 <Link
                   to="/app/branches"
-                  className={`flex items-center gap-3 py-2 px-3 rounded-lg transition-all duration-200 ${
+                  className={`flex items-center gap-3 py-2.5 px-3 rounded-xl transition-all duration-200 ${
                     location.pathname.startsWith('/app/branches') 
-                      ? 'bg-[#3b5f8f] text-white shadow-sm' 
-                      : 'text-blue-100 hover:bg-white/5'
+                      ? 'bg-indigo-600 text-white shadow-md' 
+                      : 'text-indigo-200 hover:bg-white/5 hover:text-white'
                   }`}
                 >
-                  <Store size={18} className={location.pathname.startsWith('/app/branches') ? 'text-white' : 'text-blue-300'} />
+                  <Store size={18} className={location.pathname.startsWith('/app/branches') ? 'text-white' : 'text-indigo-400'} />
                   <span className="font-medium text-[13px]">{t('branches')}</span>
                 </Link>
               </nav>
             </div>
           )}
-
         </div>
 
         {/* Profile Area */}
-        <div className="px-3 mt-auto">
-          <div className="flex items-center justify-between bg-[#2d4872] p-2.5 rounded-xl cursor-pointer hover:bg-[#344f7a] transition">
+        <div className="px-4 mt-auto">
+          <div className="flex items-center justify-between bg-[#2d2a5e] p-2.5 rounded-xl cursor-pointer hover:bg-[#38357a] transition">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full overflow-hidden bg-emerald-500 flex items-center justify-center text-white font-bold border border-white/20">
+              <div className="w-9 h-9 rounded-full overflow-hidden bg-indigo-500 flex items-center justify-center text-white font-bold border border-indigo-400/30">
                  {user?.name?.charAt(0) || 'E'}
               </div>
               <div>
                 <p className="text-[13px] font-bold text-white leading-tight">{user?.name || 'Admin'}</p>
-                {/* ✅ Role ka naam theek se dikhane ke liye */}
-                <p className="text-[11px] text-blue-200 capitalize">{user?.role?.replace('_', ' ') || 'Manager'}</p>
+                <p className="text-[11px] text-indigo-300 capitalize">{user?.role?.replace('_', ' ') || 'Manager'}</p>
               </div>
             </div>
-            <button onClick={handleLogout} className="text-blue-300 hover:text-white transition">
+            <button onClick={handleLogout} className="text-indigo-300 hover:text-white transition">
               <LogOut size={16} />
             </button>
           </div>
@@ -216,7 +212,6 @@ const PosLayout = () => {
         <header className="h-16 bg-white border-b border-slate-100 flex items-center justify-between px-6 shrink-0">
           <div className="flex items-center gap-3">
             <h2 className="text-lg font-bold text-slate-800">
-              {/* ✅ Update: Role ke hisaab se title */}
               {user?.role === 'super_admin' 
                 ? (isGlobalView ? 'Global Admin' : 'Super Admin Panel') 
                 : user?.role === 'store_admin' 
@@ -226,7 +221,6 @@ const PosLayout = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            {/* ✅ PWA Install Button */}
             {isInstallable && (
               <button 
                 onClick={handleInstallClick}
@@ -236,7 +230,6 @@ const PosLayout = () => {
               </button>
             )}
 
-            {/* ✅ Branch Selector: Super Admin (Global) aur Store Admin (Apni branches) */}
             {user?.role === 'super_admin' ? (
               <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 shadow-sm hover:border-teal-500 transition">
                 <Store size={16} className="text-teal-600" />
@@ -260,7 +253,6 @@ const PosLayout = () => {
                   onChange={(e) => setSelectedBranch(e.target.value)}
                   className="bg-transparent text-sm font-medium text-slate-800 outline-none cursor-pointer pr-2"
                 >
-                  {/* ✅ Fallback: Agar branches fetch nahi hui to user ki apni branch dikhaye */}
                   {branches.length > 0 ? (
                     branches.map(b => (
                       <option key={b._id} value={b._id}>{b.name}</option>

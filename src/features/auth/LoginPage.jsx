@@ -59,10 +59,11 @@ const LoginPage = () => {
 
         <div className="relative z-10">
           <div className="flex items-center gap-3 text-white mb-16">
-            <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg">
-              <Store size={28} className="text-[#0f766e]" />
+            {/* ✅ NAYA LOGO YAHAN LAGA HAI */}
+            <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg overflow-hidden p-1">
+              <img src="/logo.svg" alt="ROSHYS Logo" className="w-full h-full object-contain" />
             </div>
-            <span className="text-2xl font-black tracking-wide">POSFlow</span>
+            <span className="text-2xl font-black tracking-wide">ROSHYS</span>
           </div>
 
           <h1 className="text-4xl font-bold text-white leading-tight mb-6">
@@ -100,10 +101,11 @@ const LoginPage = () => {
           
           {/* Mobile Logo */}
           <div className="lg:hidden flex items-center justify-center gap-3 mb-8">
-            <div className="w-12 h-12 bg-[#0f766e] rounded-xl flex items-center justify-center shadow-lg">
-              <Store size={28} className="text-white" />
+            {/* ✅ MOBILE KE LIYE NAYA LOGO */}
+            <div className="w-12 h-12 bg-white border border-slate-200 rounded-xl flex items-center justify-center shadow-lg overflow-hidden p-1">
+              <img src="/logo.svg" alt="ROSHYS Logo" className="w-full h-full object-contain" />
             </div>
-            <span className="text-2xl font-black text-slate-900">POSFlow</span>
+            <span className="text-2xl font-black text-slate-900">ROSHYS</span>
           </div>
 
           <div className="text-center lg:text-left mb-8">
