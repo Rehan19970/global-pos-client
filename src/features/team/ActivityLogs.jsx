@@ -25,7 +25,6 @@ const ActivityLogs = () => {
     try {
       let url = '/activity?';
       
-      // ✅ FIX: store_admin aur super_admin dono handle karein
       const isAdminLevel = user?.role === 'super_admin' || user?.role === 'store_admin';
       const branchId = selectedBranch || user?.branchId?._id || user?.branchId;
       
@@ -60,104 +59,153 @@ const ActivityLogs = () => {
   if (isLoading) return <div className="p-8 text-center text-slate-500">{t('loadingLogs')}</div>;
 
   return (
-    <div className="p-8 h-full overflow-y-auto bg-[#f8fafc]">
+    <div className="p-4 md:p-8 h-full overflow-y-auto bg-[#f8fafc]">
       
       {/* HEADER */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-            <Shield className="text-teal-600" size={32} /> {t('systemActivityLogs')}
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 flex items-center gap-2 md:gap-3">
+            <Shield className="text-teal-600" size={28} /> {t('systemActivityLogs')}
           </h1>
-          <p className="text-slate-500 mt-1">{t('monitorSystemActions')}</p>
+          <p className="text-sm md:text-base text-slate-500 mt-1">{t('monitorSystemActions')}</p>
         </div>
       </div>
 
       {/* FILTERS */}
-      <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 mb-6 flex flex-wrap gap-4 items-center">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-2.5 text-slate-400" size={18} />
+      <div className="bg-white p-3 md:p-4 rounded-2xl shadow-sm border border-slate-100 mb-4 md:mb-6 flex flex-col sm:flex-row flex-wrap gap-3 md:gap-4 items-stretch sm:items-center">
+        <div className="relative flex-1 min-w-full sm:min-w-[200px]">
+          <Search className="absolute left-3 top-3 text-slate-400" size={18} />
           <input 
             type="text" 
             placeholder={t('searchDescription')} 
             value={searchTerm} 
             onChange={e => setSearchTerm(e.target.value)} 
-            className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 pl-10 pr-4 text-sm outline-none focus:ring-2 focus:ring-teal-500" 
+            className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 pl-10 pr-4 text-sm outline-none focus:ring-2 focus:ring-teal-500" 
           />
         </div>
 
-        <select value={filterAction} onChange={e => setFilterAction(e.target.value)} className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm outline-none font-medium">
-          <option value="">{t('allActions')}</option>
-          <option value="LOGIN">{t('login')}</option>
-          <option value="CREATE">{t('create')}</option>
-          <option value="UPDATE">{t('update')}</option>
-          <option value="DELETE">{t('delete')}</option>
-          <option value="SALE">{t('sale')}</option>
-        </select>
+        <div className="flex gap-2 w-full sm:w-auto">
+          <select value={filterAction} onChange={e => setFilterAction(e.target.value)} className="flex-1 sm:w-auto bg-slate-50 border border-slate-200 rounded-xl px-3 md:px-4 py-2.5 text-sm outline-none font-medium cursor-pointer">
+            <option value="">{t('allActions')}</option>
+            <option value="LOGIN">{t('login')}</option>
+            <option value="CREATE">{t('create')}</option>
+            <option value="UPDATE">{t('update')}</option>
+            <option value="DELETE">{t('delete')}</option>
+            <option value="SALE">{t('sale')}</option>
+          </select>
 
-        <select value={filterModule} onChange={e => setFilterModule(e.target.value)} className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm outline-none font-medium">
-          <option value="">{t('allModules')}</option>
-          <option value="Product">{t('product')}</option>
-          <option value="Sale">{t('sale')}</option>
-          <option value="Customer">{t('customer')}</option>
-          <option value="Inventory">{t('inventory')}</option>
-          <option value="Auth">{t('auth')}</option>
-        </select>
+          <select value={filterModule} onChange={e => setFilterModule(e.target.value)} className="flex-1 sm:w-auto bg-slate-50 border border-slate-200 rounded-xl px-3 md:px-4 py-2.5 text-sm outline-none font-medium cursor-pointer">
+            <option value="">{t('allModules')}</option>
+            <option value="Product">{t('product')}</option>
+            <option value="Sale">{t('sale')}</option>
+            <option value="Customer">{t('customer')}</option>
+            <option value="Inventory">{t('inventory')}</option>
+            <option value="Auth">{t('auth')}</option>
+          </select>
+        </div>
       </div>
 
       {/* LOGS TABLE */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-        <table className="w-full text-left">
-          <thead className="bg-slate-50 text-slate-500 text-xs uppercase border-b border-slate-100">
-            <tr>
-              <th className="p-4 font-bold pl-6">{t('time')}</th>
-              <th className="p-4 font-bold">{t('user')}</th>
-              <th className="p-4 font-bold">{t('action')}</th>
-              <th className="p-4 font-bold">{t('description')}</th>
-              <th className="p-4 font-bold">{t('status')}</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {logs.map((log, index) => (
-              <tr key={index} className="hover:bg-slate-50 transition">
-                <td className="p-4 pl-6 text-slate-500 text-xs font-medium">
-                  <div className="flex items-center gap-1"><Clock size={12}/> {new Date(log.createdAt).toLocaleString()}</div>
-                </td>
-                <td className="p-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs">
-                      {log.userName?.charAt(0) || 'U'}
-                    </div>
-                    <div>
-                      <p className="font-bold text-slate-800 text-sm">{log.userName}</p>
-                      <p className="text-[10px] text-slate-500 uppercase">{log.userRole}</p>
-                    </div>
+        
+        {/* MOBILE VIEW (Cards) */}
+        <div className="md:hidden p-4 space-y-3 bg-slate-50/50">
+          {logs.map((log, index) => (
+            <div key={index} className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+              <div className="flex justify-between items-start mb-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs shrink-0">
+                    {log.userName?.charAt(0) || 'U'}
                   </div>
-                </td>
-                <td className="p-4">
-                  <span className={`px-2 py-1 rounded text-[10px] font-bold ${getActionBadge(log.action)}`}>
-                    {log.action}
-                  </span>
-                </td>
-                <td className="p-4 text-sm text-slate-700 font-medium">{log.description}</td>
-                <td className="p-4">
-                  {log.status === 'Success' ? (
-                    <span className="flex items-center gap-1 text-xs font-bold text-green-600"><CheckCircle2 size={14}/> {t('success')}</span>
-                  ) : (
-                    <span className="flex items-center gap-1 text-xs font-bold text-red-600"><XCircle size={14}/> {t('failed')}</span>
-                  )}
-                </td>
-              </tr>
-            ))}
-            {logs.length === 0 && (
+                  <div>
+                    <p className="font-bold text-slate-800 text-sm">{log.userName}</p>
+                    <p className="text-[9px] text-slate-500 uppercase">{log.userRole}</p>
+                  </div>
+                </div>
+                <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${getActionBadge(log.action)}`}>
+                  {log.action}
+                </span>
+              </div>
+
+              <div className="my-2 text-xs text-slate-700 font-medium bg-slate-50 p-2 rounded-lg border border-slate-100">
+                {log.description}
+              </div>
+
+              <div className="flex justify-between items-center pt-2 border-t border-slate-100">
+                <div className="flex items-center gap-1 text-[10px] text-slate-500">
+                  <Clock size={12} /> {new Date(log.createdAt).toLocaleString()}
+                </div>
+                {log.status === 'Success' ? (
+                  <span className="flex items-center gap-1 text-[10px] font-bold text-green-600"><CheckCircle2 size={12}/> {t('success')}</span>
+                ) : (
+                  <span className="flex items-center gap-1 text-[10px] font-bold text-red-600"><XCircle size={12}/> {t('failed')}</span>
+                )}
+              </div>
+            </div>
+          ))}
+          {logs.length === 0 && (
+            <div className="p-8 text-center text-slate-500 text-sm">
+              <Activity size={32} className="mx-auto mb-2 text-slate-300" />
+              {t('noActivityLogs')}
+            </div>
+          )}
+        </div>
+
+        {/* DESKTOP VIEW (Table) */}
+        <div className="hidden md:block overflow-x-auto">
+          <table className="w-full text-left">
+            <thead className="bg-slate-50 text-slate-500 text-xs uppercase border-b border-slate-100">
               <tr>
-                <td colSpan="5" className="p-10 text-center text-slate-500">
-                  <Activity size={48} className="mx-auto mb-3 text-slate-300" />
-                  {t('noActivityLogs')}
-                </td>
+                <th className="p-4 font-bold pl-6">{t('time')}</th>
+                <th className="p-4 font-bold">{t('user')}</th>
+                <th className="p-4 font-bold">{t('action')}</th>
+                <th className="p-4 font-bold">{t('description')}</th>
+                <th className="p-4 font-bold">{t('status')}</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {logs.map((log, index) => (
+                <tr key={index} className="hover:bg-slate-50 transition">
+                  <td className="p-4 pl-6 text-slate-500 text-xs font-medium">
+                    <div className="flex items-center gap-1"><Clock size={12}/> {new Date(log.createdAt).toLocaleString()}</div>
+                  </td>
+                  <td className="p-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs">
+                        {log.userName?.charAt(0) || 'U'}
+                      </div>
+                      <div>
+                        <p className="font-bold text-slate-800 text-sm">{log.userName}</p>
+                        <p className="text-[10px] text-slate-500 uppercase">{log.userRole}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="p-4">
+                    <span className={`px-2 py-1 rounded text-[10px] font-bold ${getActionBadge(log.action)}`}>
+                      {log.action}
+                    </span>
+                  </td>
+                  <td className="p-4 text-sm text-slate-700 font-medium">{log.description}</td>
+                  <td className="p-4">
+                    {log.status === 'Success' ? (
+                      <span className="flex items-center gap-1 text-xs font-bold text-green-600"><CheckCircle2 size={14}/> {t('success')}</span>
+                    ) : (
+                      <span className="flex items-center gap-1 text-xs font-bold text-red-600"><XCircle size={14}/> {t('failed')}</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+              {logs.length === 0 && (
+                <tr>
+                  <td colSpan="5" className="p-10 text-center text-slate-500">
+                    <Activity size={48} className="mx-auto mb-3 text-slate-300" />
+                    {t('noActivityLogs')}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
     </div>

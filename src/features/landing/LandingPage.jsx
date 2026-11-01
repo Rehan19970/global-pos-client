@@ -116,7 +116,7 @@ const LandingPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#fbf8f2] text-stone-900 font-sans selection:bg-teal-200 overflow-x-hidden">
+    <div className="posflow-landing min-h-screen bg-[#fbf8f2] text-stone-900 font-sans selection:bg-teal-200 overflow-x-hidden">
       <style>{`
         @keyframes floaty { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
         @keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
@@ -124,6 +124,99 @@ const LandingPage = () => {
         .floaty-slow { animation: floaty 7s ease-in-out infinite; }
         .marquee { animation: marquee 30s linear infinite; }
         html { scroll-behavior: smooth; }
+
+        /* Responsive layout refinements */
+        .posflow-landing { width: 100%; min-width: 0; }
+        .posflow-landing *, .posflow-landing *::before, .posflow-landing *::after { box-sizing: border-box; }
+        .posflow-landing img, .posflow-landing svg { max-width: 100%; }
+        .posflow-landing section[id], .posflow-landing header[id] { scroll-margin-top: 96px; }
+        .posflow-landing .max-w-7xl { width: 100%; }
+        .posflow-landing button, .posflow-landing a { -webkit-tap-highlight-color: transparent; }
+        .posflow-landing button { touch-action: manipulation; }
+
+        @media (min-width: 1536px) {
+          .posflow-landing .max-w-7xl { max-width: 1320px; }
+        }
+
+        @media (max-width: 1023px) {
+          .posflow-landing header.relative { padding-top: 128px; padding-bottom: 72px; }
+          .posflow-landing header .gap-16 { gap: 3rem; }
+          .posflow-landing section.py-24 { padding-top: 5rem; padding-bottom: 5rem; }
+          .posflow-landing section.py-20 { padding-top: 4.5rem; padding-bottom: 4.5rem; }
+          .posflow-landing .floaty { left: 0.5rem; }
+          .posflow-landing .floaty-slow { right: 0.5rem; }
+        }
+
+        @media (max-width: 767px) {
+          .posflow-landing .max-w-7xl { padding-left: 1.25rem; padding-right: 1.25rem; }
+          .posflow-landing nav .max-w-7xl { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+          .posflow-landing header.relative { padding-top: 112px; padding-bottom: 3.5rem; }
+          .posflow-landing header h1 { font-size: clamp(2.35rem, 9vw, 3.6rem); line-height: 1.08; overflow-wrap: anywhere; }
+          .posflow-landing header p { font-size: 1rem; }
+          .posflow-landing header .max-w-2xl { max-width: 100%; }
+          .posflow-landing header .rounded-3xl { border-radius: 1.25rem; }
+          .posflow-landing header .p-6 { padding: 1rem; }
+          .posflow-landing header .grid-cols-3 { gap: 0.5rem; }
+          .posflow-landing header .grid-cols-3 > div { min-width: 0; padding: 0.65rem; }
+          .posflow-landing header .grid-cols-3 > div p:last-of-type { font-size: 1.1rem; }
+          .posflow-landing header .h-40 { height: 8rem; }
+          .posflow-landing header .floaty,
+          .posflow-landing header .floaty-slow { display: none; }
+          .posflow-landing section.py-16 { padding-top: 3rem; padding-bottom: 3rem; }
+          .posflow-landing section.py-20,
+          .posflow-landing section.py-24 { padding-top: 3.5rem; padding-bottom: 3.5rem; }
+          .posflow-landing .mb-14 { margin-bottom: 2rem; }
+          .posflow-landing h2 { overflow-wrap: break-word; }
+          .posflow-landing .text-3xl { font-size: clamp(1.65rem, 6vw, 2rem); line-height: 1.2; }
+          .posflow-landing .text-4xl { font-size: clamp(1.9rem, 7vw, 2.35rem); line-height: 1.15; }
+          .posflow-landing .p-8 { padding: 1.35rem; }
+          .posflow-landing .rounded-3xl { border-radius: 1.35rem; }
+          .posflow-landing #pricing [class~="md:-translate-y-4"] { transform: none; }
+          .posflow-landing #pricing .text-5xl { font-size: 2.6rem; }
+          .posflow-landing #pricing [class*="MOST POPULAR"] { right: 1rem; }
+          .posflow-landing footer .gap-6 { gap: 1rem; }
+          .posflow-landing footer .flex { flex-wrap: wrap; }
+          .posflow-landing footer p { text-align: center; }
+        }
+
+        @media (max-width: 480px) {
+          .posflow-landing .max-w-7xl { padding-left: 1rem; padding-right: 1rem; }
+          .posflow-landing nav a.text-2xl { font-size: 1.25rem; }
+          .posflow-landing nav a.text-2xl span { width: 2.25rem; height: 2.25rem; }
+          .posflow-landing nav [class~="lg:hidden"] + div { padding-left: 1rem; padding-right: 1rem; }
+          .posflow-landing header .inline-flex.rounded-full { max-width: 100%; white-space: normal; justify-content: center; text-align: center; }
+          .posflow-landing header h1 { font-size: clamp(2.1rem, 10vw, 2.8rem); }
+          .posflow-landing header .flex-wrap { column-gap: 0.85rem; }
+          .posflow-landing header .grid-cols-3 > div p:first-child { font-size: 0.62rem; }
+          .posflow-landing header .grid-cols-3 > div p:last-of-type { font-size: 1rem; }
+          .posflow-landing #pricing .flex.items-center.justify-center { gap: 0.6rem; }
+          .posflow-landing #pricing .text-xs { font-size: 0.68rem; }
+          .posflow-landing #faq button { padding: 1rem; }
+          .posflow-landing #faq button span:first-child { font-size: 0.9rem; }
+          .posflow-landing #faq p { padding-left: 1rem; padding-right: 1rem; }
+          .posflow-landing section.pb-24 { padding-bottom: 3rem; }
+          .posflow-landing section.pb-24 [class*="rounded-[2.5rem]"] { border-radius: 1.5rem; padding: 2.5rem 1.25rem; }
+          .posflow-landing footer .max-w-7xl { gap: 1.25rem; }
+        }
+
+        @media (max-width: 360px) {
+          .posflow-landing .max-w-7xl { padding-left: 0.85rem; padding-right: 0.85rem; }
+          .posflow-landing header h1 { font-size: 2rem; }
+          .posflow-landing header .grid-cols-3 { gap: 0.35rem; }
+          .posflow-landing header .grid-cols-3 > div { padding: 0.5rem; }
+          .posflow-landing header .grid-cols-3 > div p:last-of-type { font-size: 0.9rem; }
+          .posflow-landing .text-5xl { font-size: 2.25rem; }
+          .posflow-landing #pricing .text-5xl { font-size: 2.25rem; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .posflow-landing *, .posflow-landing *::before, .posflow-landing *::after {
+            scroll-behavior: auto !important;
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+          }
+        }
       `}</style>
 
       {/* NAVBAR */}

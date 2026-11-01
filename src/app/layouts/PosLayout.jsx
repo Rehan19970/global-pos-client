@@ -4,7 +4,7 @@ import {
   LayoutDashboard, ShoppingCart, Package, FileText, Users, 
   Box, TrendingUp, Settings, UserCog, 
   HelpCircle, Store, ArrowRightLeft, Truck, Tag,
-  ChevronDown, Activity, LogOut, Download
+  ChevronDown, Activity, LogOut, Download, Menu, X
 } from 'lucide-react';
 import api from '../../lib/api';
 import useAuthStore from '../../store/authStore';
@@ -14,6 +14,7 @@ const PosLayout = () => {
   const { user, logout, selectedBranch, setSelectedBranch } = useAuthStore();
   const { t } = useLanguage();
   const [branches, setBranches] = useState([]);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // ✅ Mobile Menu State
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -63,6 +64,11 @@ const PosLayout = () => {
     navigate('/login');
   };
 
+  // ✅ Mobile menu close on link click
+  const handleLinkClick = () => {
+    setIsMobileMenuOpen(false);
+  };
+
   const mainMenu = [
     { name: t('dashboard'), path: '/app/dashboard', icon: LayoutDashboard },
     ...(!isGlobalView ? [
@@ -88,20 +94,34 @@ const PosLayout = () => {
   ];
 
   return (
-    <div className="flex h-screen bg-slate-100 overflow-hidden p-4 gap-4">
+    <div className="flex h-screen bg-slate-100 overflow-hidden p-2 md:p-4 gap-2 md:gap-4">
       
-      {/* SIDEBAR - Master Admin Style */}
-      <aside className="w-64 bg-[#1e1b4b] text-white flex flex-col shadow-2xl h-full py-4 border-r border-indigo-900/50 rounded-3xl overflow-hidden">
+      {/* MOBILE SIDEBAR OVERLAY (Black Background) */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 lg:hidden transition-opacity"
+          onClick={() => setIsMobileMenuOpen(false)}
+        ></div>
+      )}
+
+      {/* SIDEBAR */}
+      <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-[#1e1b4b] text-white flex flex-col shadow-2xl h-full py-4 border-r border-indigo-900/50 rounded-r-3xl lg:rounded-3xl overflow-hidden transform transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
         
-        {/* ✅ ROSHYS Logo Area */}
-        <div className="flex items-center px-6 mb-8 mt-2">
-          <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center mr-3 shadow-lg overflow-hidden p-1">
-            <img src="/logo.svg" alt="ROSHYS Logo" className="w-full h-full object-contain" />
+        {/* Logo Area */}
+        <div className="flex items-center justify-between px-6 mb-8 mt-2">
+          <div className="flex items-center">
+            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center mr-3 shadow-lg overflow-hidden p-1">
+              <img src="/logo.svg" alt="ROSHYS Logo" className="w-full h-full object-contain" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold tracking-tight">ROSHYS</h1>
+              <p className="text-[10px] text-indigo-300 font-medium tracking-widest uppercase">POS SYSTEM</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-xl font-bold tracking-tight">ROSHYS</h1>
-            <p className="text-[10px] text-indigo-300 font-medium tracking-widest uppercase">POS SYSTEM</p>
-          </div>
+          {/* Close button on mobile */}
+          <button onClick={() => setIsMobileMenuOpen(false)} className="lg:hidden p-1 text-indigo-300 hover:text-white bg-white/10 rounded-lg">
+            <X size={20} />
+          </button>
         </div>
 
         {/* Menu Items */}
@@ -124,6 +144,7 @@ const PosLayout = () => {
                   <Link
                     key={item.path}
                     to={item.path}
+                    onClick={handleLinkClick}
                     className={`flex items-center justify-between py-2.5 px-3 rounded-xl transition-all duration-200 ${
                       isActive 
                         ? 'bg-indigo-600 text-white shadow-md' 
@@ -151,6 +172,7 @@ const PosLayout = () => {
                   <Link
                     key={item.path}
                     to={item.path}
+                    onClick={handleLinkClick}
                     className={`flex items-center gap-3 py-2.5 px-3 rounded-xl transition-all duration-200 ${
                       isActive 
                         ? 'bg-indigo-600 text-white shadow-md' 
@@ -172,6 +194,7 @@ const PosLayout = () => {
               <nav className="space-y-1">
                 <Link
                   to="/app/branches"
+                  onClick={handleLinkClick}
                   className={`flex items-center gap-3 py-2.5 px-3 rounded-xl transition-all duration-200 ${
                     location.pathname.startsWith('/app/branches') 
                       ? 'bg-indigo-600 text-white shadow-md' 
@@ -206,12 +229,19 @@ const PosLayout = () => {
       </aside>
 
       {/* MAIN CONTENT AREA */}
-      <main className="flex-1 bg-white rounded-3xl shadow-sm overflow-hidden flex flex-col">
+      <main className="flex-1 bg-white rounded-2xl md:rounded-3xl shadow-sm overflow-hidden flex flex-col w-full min-w-0">
         
-        {/* TOP BAR with Branch Selector and Install Button */}
-        <header className="h-16 bg-white border-b border-slate-100 flex items-center justify-between px-6 shrink-0">
-          <div className="flex items-center gap-3">
-            <h2 className="text-lg font-bold text-slate-800">
+        {/* TOP BAR with Mobile Menu Button */}
+        <header className="h-16 bg-white border-b border-slate-100 flex items-center justify-between px-4 md:px-6 shrink-0">
+          <div className="flex items-center gap-2 md:gap-3">
+            {/* ✅ Mobile Hamburger Button */}
+            <button 
+              onClick={() => setIsMobileMenuOpen(true)} 
+              className="lg:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg transition"
+            >
+              <Menu size={24} />
+            </button>
+            <h2 className="text-base md:text-lg font-bold text-slate-800 truncate">
               {user?.role === 'super_admin' 
                 ? (isGlobalView ? 'Global Admin' : 'Super Admin Panel') 
                 : user?.role === 'store_admin' 
@@ -220,38 +250,39 @@ const PosLayout = () => {
             </h2>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4">
             {isInstallable && (
               <button 
                 onClick={handleInstallClick}
-                className="flex items-center gap-2 bg-teal-50 hover:bg-teal-100 text-teal-700 border border-teal-200 px-4 py-2 rounded-xl text-sm font-bold shadow-sm transition animate-pulse"
+                className="hidden md:flex items-center gap-2 bg-teal-50 hover:bg-teal-100 text-teal-700 border border-teal-200 px-4 py-2 rounded-xl text-sm font-bold shadow-sm transition animate-pulse"
               >
                 <Download size={16} /> Install App
               </button>
             )}
 
+            {/* Branch Selector - Hidden text on mobile to save space */}
             {user?.role === 'super_admin' ? (
-              <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 shadow-sm hover:border-teal-500 transition">
-                <Store size={16} className="text-teal-600" />
+              <div className="flex items-center gap-1 md:gap-2 bg-slate-50 border border-slate-200 rounded-xl px-2 md:px-3 py-1.5 md:py-2 shadow-sm hover:border-teal-500 transition">
+                <Store size={16} className="text-teal-600 hidden md:block" />
                 <select
                   value={selectedBranch}
                   onChange={(e) => setSelectedBranch(e.target.value)}
-                  className="bg-transparent text-sm font-medium text-slate-800 outline-none cursor-pointer pr-2"
+                  className="bg-transparent text-xs md:text-sm font-medium text-slate-800 outline-none cursor-pointer pr-1 md:pr-2 max-w-[100px] md:max-w-full truncate"
                 >
                   <option value="">All Branches</option>
                   {branches.map(b => (
                     <option key={b._id} value={b._id}>{b.name}</option>
                   ))}
                 </select>
-                <ChevronDown size={14} className="text-slate-400 pointer-events-none" />
+                <ChevronDown size={14} className="text-slate-400 pointer-events-none hidden md:block" />
               </div>
             ) : (user?.role === 'store_admin' || user?.role === 'manager') ? (
-              <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 shadow-sm hover:border-teal-500 transition">
-                <Store size={16} className="text-teal-600" />
+              <div className="flex items-center gap-1 md:gap-2 bg-slate-50 border border-slate-200 rounded-xl px-2 md:px-3 py-1.5 md:py-2 shadow-sm hover:border-teal-500 transition">
+                <Store size={16} className="text-teal-600 hidden md:block" />
                 <select
                   value={selectedBranch || (user?.branchId?._id || user?.branchId)}
                   onChange={(e) => setSelectedBranch(e.target.value)}
-                  className="bg-transparent text-sm font-medium text-slate-800 outline-none cursor-pointer pr-2"
+                  className="bg-transparent text-xs md:text-sm font-medium text-slate-800 outline-none cursor-pointer pr-1 md:pr-2 max-w-[100px] md:max-w-full truncate"
                 >
                   {branches.length > 0 ? (
                     branches.map(b => (
@@ -261,12 +292,12 @@ const PosLayout = () => {
                     <option value={user?.branchId?._id || user?.branchId}>{user?.branchId?.name || 'My Store'}</option>
                   )}
                 </select>
-                <ChevronDown size={14} className="text-slate-400 pointer-events-none" />
+                <ChevronDown size={14} className="text-slate-400 pointer-events-none hidden md:block" />
               </div>
             ) : (
-              <div className="flex items-center gap-2 bg-slate-100 border border-slate-200 rounded-xl px-4 py-2 cursor-not-allowed">
-                <Store size={16} className="text-slate-500" />
-                <span className="text-sm font-bold text-slate-700">
+              <div className="flex items-center gap-2 bg-slate-100 border border-slate-200 rounded-xl px-2 md:px-4 py-1.5 md:py-2 cursor-not-allowed">
+                <Store size={16} className="text-slate-500 hidden md:block" />
+                <span className="text-xs md:text-sm font-bold text-slate-700 max-w-[80px] md:max-w-full truncate">
                   {user?.branchId?.name || 'Assigned Branch'}
                 </span>
               </div>

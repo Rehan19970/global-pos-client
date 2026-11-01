@@ -4,7 +4,7 @@ import { toast } from 'react-hot-toast';
 import api from '../../lib/api';
 import { formatCurrency, getStoreSettings } from '../../lib/formatCurrency';
 import { onSettingsUpdated } from '../../lib/currencyEvents';
-import { printRefundReceipt } from '../../lib/printReceipt'; // ✅ NAYA: Refund Print
+import { printRefundReceipt } from '../../lib/printReceipt';
 import useAuthStore from '../../store/authStore';
 import { useLanguage } from '../../context/LanguageContext';
 
@@ -12,7 +12,6 @@ const Orders = () => {
   const { user, selectedBranch } = useAuthStore(); 
   const { t } = useLanguage();
 
-  // ✅ Currency sync state
   const [storeSettings, setStoreSettings] = useState(getStoreSettings());
 
   useEffect(() => {
@@ -38,7 +37,6 @@ const Orders = () => {
     try {
       let url = '/pos/sales';
       
-      // ✅ FIX: store_admin aur super_admin dono handle karein
       const isAdminLevel = user?.role === 'super_admin' || user?.role === 'store_admin';
       
       if (isAdminLevel) {
@@ -78,7 +76,7 @@ const Orders = () => {
         originalBaseQty: item.originalBaseQty || item.qty,
         refundedQty: alreadyRefunded,
         originalQty: totalQty,
-        total: item.total // ✅ Item Total save karein
+        total: item.total
       };
     }));
     setIsDetailModalOpen(true);
@@ -94,7 +92,6 @@ const Orders = () => {
     const itemsToReturn = refundItems
       .filter(item => item.refundQty > 0)
       .map(item => {
-        // ✅ FIX: Per Unit Price nikaalne ke liye Sale ke 'total' ko qty se divide karein
         let totalQty = Number(item.qty) || 1;
         if (item.displayQty) {
           const match = item.displayQty.match(/[\d.]+/);
@@ -134,7 +131,6 @@ const Orders = () => {
     return matchesSearch && matchesStatus;
   });
 
-  // ✅ FIX: Dynamic Status Badge (Partial Refund ke liye)
   const getStatusBadge = (status, refundAmount = 0, originalTotal = 0) => {
     if (status === 'Refunded') return 'bg-red-100 text-red-700 border-red-200';
     if (refundAmount > 0 && refundAmount < originalTotal) return 'bg-orange-100 text-orange-700 border-orange-200';
@@ -147,25 +143,24 @@ const Orders = () => {
     return t('completed');
   };
 
-  // ✅ Currency formatter
   const fmt = (value) => formatCurrency(value, { settings: storeSettings });
 
   return (
-    <div className="p-8 h-full overflow-y-auto bg-[#f8fafc]">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+    <div className="p-4 md:p-8 h-full overflow-y-auto bg-[#f8fafc]">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">{t('ordersHistory')}</h1>
-          <p className="text-slate-500 mt-1">{t('viewManageSales')}</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-900">{t('ordersHistory')}</h1>
+          <p className="text-sm md:text-base text-slate-500 mt-1">{t('viewManageSales')}</p>
         </div>
       </div>
 
       <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
-        <div className="flex items-center gap-3 w-full md:w-auto flex-1">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto flex-1">
           <div className="relative flex-1 md:max-w-xs">
-            <Search className="absolute left-3 top-2.5 text-slate-400" size={18} />
-            <input type="text" placeholder={t('searchByInvoiceCashier')} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl py-2 pl-10 pr-4 outline-none focus:ring-2 focus:ring-teal-500" />
+            <Search className="absolute left-3 top-3 text-slate-400" size={18} />
+            <input type="text" placeholder={t('searchByInvoiceCashier')} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl py-2.5 pl-10 pr-4 outline-none focus:ring-2 focus:ring-teal-500" />
           </div>
-          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="appearance-none bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-xl py-2 pl-4 pr-10 outline-none focus:ring-2 focus:ring-teal-500 font-medium cursor-pointer">
+          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="appearance-none bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-xl py-2.5 pl-4 pr-10 outline-none focus:ring-2 focus:ring-teal-500 font-medium cursor-pointer">
             <option value="All">{t('allStatus')}</option>
             <option value="Completed">{t('completed')}</option>
             <option value="Refunded">{t('refunded')}</option>
@@ -174,7 +169,60 @@ const Orders = () => {
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-        <div className="overflow-x-auto">
+        
+        {/* MOBILE VIEW (Cards) */}
+        <div className="md:hidden p-4 space-y-3 bg-slate-50/50">
+          {filteredOrders.length === 0 ? (
+            <div className="p-8 text-center text-slate-500">
+              <ShoppingBag size={40} className="mx-auto mb-3 text-slate-300" />
+              <p className="text-sm font-medium">{t('noOrdersFound')}</p>
+            </div>
+          ) : (
+            filteredOrders.map((order) => {
+              const refundedAmt = order.refundDetails?.totalRefundAmount || 0;
+              const netTotal = order.grandTotal - refundedAmt;
+
+              return (
+                <div key={order._id} className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+                  <div className="flex justify-between items-start mb-2 pb-2 border-b border-slate-100">
+                    <div>
+                      <p className="font-bold text-teal-700 text-sm">{order.invoiceNumber}</p>
+                      <p className="text-[10px] text-slate-500">{new Date(order.createdAt).toLocaleString()}</p>
+                    </div>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${getStatusBadge(order.status, refundedAmt, order.grandTotal)}`}>
+                      {getStatusText(order.status, refundedAmt, order.grandTotal)}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="text-[10px] text-slate-500 uppercase font-bold mb-0.5">Cashier</p>
+                      <p className="text-xs font-medium text-slate-800">{order.cashierId?.name || 'Unknown'}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[10px] text-slate-500 uppercase font-bold mb-0.5">Total</p>
+                      {refundedAmt > 0 ? (
+                        <div className="flex flex-col items-end">
+                          <span className="font-bold text-slate-900 text-sm">{fmt(netTotal)}</span>
+                          <span className="text-[9px] text-slate-400 line-through">{fmt(order.grandTotal)}</span>
+                        </div>
+                      ) : (
+                        <span className="font-bold text-slate-900 text-sm">{fmt(order.grandTotal)}</span>
+                      )}
+                    </div>
+                  </div>
+
+                  <button onClick={() => handleViewOrder(order)} className="w-full mt-3 bg-slate-50 hover:bg-slate-100 text-slate-700 py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 border border-slate-200">
+                    <Eye size={14} /> View Details & Refund
+                  </button>
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* DESKTOP VIEW (Table) */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left">
             <thead className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider border-b border-slate-100">
               <tr>
@@ -210,7 +258,6 @@ const Orders = () => {
                         </span>
                       </td>
                       <td className="p-4 text-right font-bold text-slate-900">
-                        {/* ✅ FIX: Agar refund hua hai to net amount aur cut amount dikhayein */}
                         {refundedAmt > 0 ? (
                           <div className="flex flex-col items-end">
                             <span>{fmt(netTotal)}</span>
@@ -236,107 +283,109 @@ const Orders = () => {
 
       {/* ORDER DETAIL & REFUND MODAL */}
       {isDetailModalOpen && selectedOrder && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-2 md:p-4">
+          <div className="bg-white rounded-2xl md:rounded-3xl w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh] md:max-h-[90vh]">
             
-            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-              <div>
-                <h2 className="text-xl font-bold text-slate-900">{t('invoice')}: {selectedOrder.invoiceNumber}</h2>
-                <p className="text-sm text-slate-500">{new Date(selectedOrder.createdAt).toLocaleString()}</p>
+            <div className="px-4 md:px-6 py-3 md:py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50 shrink-0">
+              <div className="min-w-0">
+                <h2 className="text-base md:text-xl font-bold text-slate-900 truncate">{t('invoice')}: {selectedOrder.invoiceNumber}</h2>
+                <p className="text-[10px] md:text-sm text-slate-500">{new Date(selectedOrder.createdAt).toLocaleString()}</p>
               </div>
-              <button onClick={() => setIsDetailModalOpen(false)} className="p-2 bg-white border border-slate-200 text-slate-500 rounded-full hover:bg-slate-100"><X size={20} /></button>
+              <button onClick={() => setIsDetailModalOpen(false)} className="p-1.5 md:p-2 bg-white border border-slate-200 text-slate-500 rounded-full hover:bg-slate-100 shrink-0 ml-2"><X size={18} className="md:w-5 md:h-5" /></button>
             </div>
 
-            <div className="p-6 overflow-y-auto">
+            <div className="p-3 md:p-6 overflow-y-auto custom-scrollbar">
               
               {/* REFUND HISTORY */}
               {selectedOrder.refundDetails && selectedOrder.refundDetails.itemsRefunded?.length > 0 && (
-                <div className="mb-6">
-                  <h3 className="font-bold text-red-600 mb-3 flex items-center gap-2">
-                    <History size={18} /> {t('refundHistory')}
+                <div className="mb-4 md:mb-6">
+                  <h3 className="font-bold text-red-600 mb-2 md:mb-3 flex items-center gap-2 text-sm md:text-base">
+                    <History size={16} className="md:w-4.5 md:h-4.5" /> {t('refundHistory')}
                   </h3>
-                  <div className="bg-red-50 border border-red-100 rounded-xl p-4">
-                    <div className="flex justify-between items-center mb-3 pb-2 border-b border-red-200">
+                  <div className="bg-red-50 border border-red-100 rounded-xl p-3 md:p-4">
+                    <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 mb-3 pb-2 border-b border-red-200">
                       <div>
-                        <p className="text-xs text-red-700 font-medium">
+                        <p className="text-[10px] md:text-xs text-red-700 font-medium">
                           {t('refundedOn')}: {new Date(selectedOrder.refundDetails.refundedAt).toLocaleString()}
                         </p>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <p className="text-sm text-red-700 font-bold">
+                      <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
+                        <p className="text-xs md:text-sm text-red-700 font-bold">
                           {t('totalRefunded')}: {fmt(selectedOrder.refundDetails.totalRefundAmount)}
                         </p>
-                        {/* ✅ NAYA: Print Refund Receipt Button */}
                         <button 
                           onClick={() => printRefundReceipt(selectedOrder, selectedOrder.refundDetails)}
-                          className="flex items-center gap-1 bg-white hover:bg-red-100 text-red-700 border border-red-200 px-2.5 py-1 rounded-lg text-xs font-bold transition shadow-sm"
+                          className="flex items-center gap-1 bg-white hover:bg-red-100 text-red-700 border border-red-200 px-2 py-1 rounded-lg text-[10px] md:text-xs font-bold transition shadow-sm"
                         >
-                          <Printer size={14} /> Print
+                          <Printer size={12} className="md:w-3.5 md:h-3.5" /> Print
                         </button>
                       </div>
                     </div>
-                    <table className="w-full text-left text-sm">
-                      <thead>
-                        <tr className="text-red-800">
-                          <th className="pb-2 font-semibold">{t('product')}</th>
-                          <th className="pb-2 font-semibold">{t('qtyRefunded')}</th>
-                          <th className="pb-2 font-semibold text-right">{t('amount')}</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-red-100">
-                        {selectedOrder.refundDetails.itemsRefunded.map((ri, idx) => (
-                          <tr key={idx}>
-                            <td className="py-2 text-slate-700">{ri.name}</td>
-                            <td className="py-2 text-slate-700">{ri.qty}</td>
-                            <td className="py-2 text-right font-bold text-red-600">{fmt(ri.refundAmount)}</td>
+                    
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-xs md:text-sm">
+                        <thead>
+                          <tr className="text-red-800">
+                            <th className="pb-2 font-semibold">{t('product')}</th>
+                            <th className="pb-2 font-semibold">{t('qtyRefunded')}</th>
+                            <th className="pb-2 font-semibold text-right">{t('amount')}</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody className="divide-y divide-red-100">
+                          {selectedOrder.refundDetails.itemsRefunded.map((ri, idx) => (
+                            <tr key={idx}>
+                              <td className="py-2 text-slate-700 truncate max-w-[120px]">{ri.name}</td>
+                              <td className="py-2 text-slate-700">{ri.qty}</td>
+                              <td className="py-2 text-right font-bold text-red-600">{fmt(ri.refundAmount)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
               )}
 
               {/* ITEMS PURCHASED */}
-              <h3 className="font-bold text-slate-800 mb-3">{t('itemsPurchased')}</h3>
-              <div className="border border-slate-200 rounded-xl overflow-hidden mb-6">
-                <table className="w-full text-left">
-                  <thead className="bg-slate-50 text-slate-500 text-xs uppercase">
+              <h3 className="font-bold text-slate-800 mb-2 md:mb-3 text-sm md:text-base">{t('itemsPurchased')}</h3>
+              <div className="border border-slate-200 rounded-xl overflow-x-auto mb-4 md:mb-6">
+                <table className="w-full text-left min-w-[500px]">
+                  <thead className="bg-slate-50 text-slate-500 text-[10px] md:text-xs uppercase">
                     <tr>
-                      <th className="p-3">{t('product')}</th>
-                      <th className="p-3">{t('price')}</th>
-                      <th className="p-3">{t('totalQty')}</th>
-                      <th className="p-3">{t('total')}</th>
-                      {selectedOrder.status !== 'Refunded' && <th className="p-3 text-center">{t('refundQty')}</th>}
+                      <th className="p-2 md:p-3">{t('product')}</th>
+                      <th className="p-2 md:p-3">{t('price')}</th>
+                      <th className="p-2 md:p-3">{t('totalQty')}</th>
+                      <th className="p-2 md:p-3">{t('total')}</th>
+                      {selectedOrder.status !== 'Refunded' && <th className="p-2 md:p-3 text-center">{t('refundQty')}</th>}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 text-sm">
+                  <tbody className="divide-y divide-slate-100 text-xs md:text-sm">
                     {selectedOrder.items.map((item, index) => (
                       <tr key={index} className={refundItems[index]?.refundedQty > 0 ? 'bg-red-50/30' : ''}>
-                        <td className="p-3 font-medium text-slate-800">{item.name}</td>
-                        <td className="p-3">{fmt(item.price)}</td>
-                        <td className="p-3 font-bold text-slate-700">
+                        <td className="p-2 md:p-3 font-medium text-slate-800">{item.name}</td>
+                        <td className="p-2 md:p-3">{fmt(item.price)}</td>
+                        <td className="p-2 md:p-3 font-bold text-slate-700">
                           {item.displayQty || `${item.qty} pcs`}
                         </td>
-                        <td className="p-3 font-bold">{fmt(item.total)}</td>
+                        <td className="p-2 md:p-3 font-bold">{fmt(item.total)}</td>
                         
                         {selectedOrder.status !== 'Refunded' && refundItems[index]?.maxQty > 0 && (
-                          <td className="p-3 text-center">
+                          <td className="p-2 md:p-3 text-center">
                             <input 
                               type="number" 
                               min="0" 
                               max={refundItems[index]?.maxQty || 1}
                               value={refundItems[index]?.refundQty || 0}
                               onChange={(e) => handleRefundQtyChange(index, e.target.value)}
-                              className="w-16 bg-white border border-slate-200 rounded-lg px-2 py-1 text-center outline-none focus:ring-2 focus:ring-teal-500"
+                              className="w-12 md:w-16 bg-white border border-slate-200 rounded-lg px-1 md:px-2 py-1 text-center outline-none focus:ring-2 focus:ring-teal-500 text-xs md:text-sm"
                             />
                           </td>
                         )}
                         {selectedOrder.status !== 'Refunded' && (refundItems[index]?.maxQty <= 0) && (
-                          <td className="p-3 text-center text-xs text-red-500 font-bold">{t('fullyRefunded')}</td>
+                          <td className="p-2 md:p-3 text-center text-[10px] text-red-500 font-bold">{t('fullyRefunded')}</td>
                         )}
                         {selectedOrder.status === 'Refunded' && (
-                          <td className="p-3 text-center text-xs text-red-500 font-bold">{t('refunded')}</td>
+                          <td className="p-2 md:p-3 text-center text-[10px] text-red-500 font-bold">{t('refunded')}</td>
                         )}
                       </tr>
                     ))}
@@ -345,13 +394,13 @@ const Orders = () => {
               </div>
 
               {/* ORDER SUMMARY */}
-              <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 text-sm">
+              <div className="bg-slate-50 p-3 md:p-4 rounded-xl border border-slate-100 text-xs md:text-sm">
                 <div className="flex justify-between mb-1"><span className="text-slate-500">{t('subtotal')}:</span><span>{fmt(selectedOrder.subTotal)}</span></div>
                 <div className="flex justify-between mb-1"><span className="text-slate-500">{t('tax')}:</span><span>{fmt(selectedOrder.taxTotal)}</span></div>
                 {selectedOrder.discount > 0 && (
                   <div className="flex justify-between mb-1 text-green-600"><span>{t('discount')}:</span><span>-{fmt(selectedOrder.discount)}</span></div>
                 )}
-                <div className="flex justify-between font-bold text-lg pt-2 border-t border-slate-200 mt-2">
+                <div className="flex justify-between font-bold text-base md:text-lg pt-2 border-t border-slate-200 mt-2">
                   <span>{t('total')}:</span><span className="text-teal-700">{fmt(selectedOrder.grandTotal)}</span>
                 </div>
                 {selectedOrder.refundDetails?.totalRefundAmount > 0 && (
@@ -360,23 +409,23 @@ const Orders = () => {
                   </div>
                 )}
                 {selectedOrder.refundDetails?.totalRefundAmount > 0 && (
-                  <div className="flex justify-between font-bold text-lg pt-2 border-t border-slate-200 mt-2">
+                  <div className="flex justify-between font-bold text-base md:text-lg pt-2 border-t border-slate-200 mt-2">
                     <span>Net Total:</span><span className="text-teal-700">{fmt(selectedOrder.grandTotal - selectedOrder.refundDetails.totalRefundAmount)}</span>
                   </div>
                 )}
-                <div className="mt-2 text-xs text-slate-500 text-right">{t('paymentMethod')}: <span className="font-bold">{selectedOrder.paymentMethod}</span></div>
+                <div className="mt-2 text-[10px] md:text-xs text-slate-500 text-right">{t('paymentMethod')}: <span className="font-bold">{selectedOrder.paymentMethod}</span></div>
               </div>
             </div>
 
-            <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
-              <button onClick={() => setIsDetailModalOpen(false)} className="px-5 py-2.5 rounded-xl font-medium text-slate-600 hover:bg-slate-200 transition">{t('close')}</button>
+            <div className="px-4 md:px-6 py-3 md:py-4 border-t border-slate-100 bg-slate-50 flex flex-col-reverse sm:flex-row justify-end gap-2 md:gap-3 shrink-0">
+              <button onClick={() => setIsDetailModalOpen(false)} className="w-full sm:w-auto px-4 md:px-5 py-2.5 rounded-xl font-medium text-slate-600 hover:bg-slate-200 transition text-sm">{t('close')}</button>
               
               {selectedOrder.status !== 'Refunded' && refundItems.some(i => i.maxQty > 0) && (
                 <button 
                   onClick={handleRefundSubmit}
-                  className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-6 py-2.5 rounded-xl font-medium shadow-sm transition"
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-4 md:px-6 py-2.5 rounded-xl font-medium shadow-sm transition text-sm"
                 >
-                  <RotateCcw size={18} /> {t('processRefund')}
+                  <RotateCcw size={16} className="md:w-4.5 md:h-4.5" /> {t('processRefund')}
                 </button>
               )}
             </div>
