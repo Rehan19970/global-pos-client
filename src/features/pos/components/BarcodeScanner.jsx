@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
-import { X, ScanLine, Camera, CheckCircle2 } from 'lucide-react';
+import { X, ScanLine, Camera, CheckCircle2, Package } from 'lucide-react';
 
 const BarcodeScanner = ({ onScanSuccess, onClose }) => {
   const [error, setError] = useState(null);
   const [hasCamera, setHasCamera] = useState(false);
   const [scannedCode, setScannedCode] = useState('');
   const [isCameraMode, setIsCameraMode] = useState(false);
-  
+
   const inputRef = useRef(null);
   const scannerRef = useRef(null);
 
