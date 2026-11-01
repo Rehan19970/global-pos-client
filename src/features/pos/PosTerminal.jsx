@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { 
   Search, ScanLine, Trash2, Plus, Minus, CreditCard, 
-  Banknote, User, ShoppingCart, PauseCircle, PlayCircle, X, BookOpen, Printer, ArrowLeft
+  Banknote, User, ShoppingCart, PauseCircle, PlayCircle, X, BookOpen, Printer, 
+  ArrowLeft, Package // ✅ Package yahan add karein
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import useCartStore from '../../store/cartStore';
