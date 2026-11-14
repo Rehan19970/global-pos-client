@@ -10,6 +10,7 @@ const BarcodeScanner = ({ onScanSuccess, onClose }) => {
 
   const inputRef = useRef(null);
   const scannerRef = useRef(null);
+  const isScanningRef = useRef(false); // ✅ Tracking ke liye
 
   // ✅ 1. Check karein ke device mein camera available hai ya nahi
   useEffect(() => {
@@ -25,7 +26,7 @@ const BarcodeScanner = ({ onScanSuccess, onClose }) => {
     checkCamera();
   }, []);
 
-  // ✅ 2. Camera Start & Auto-Stop Logic (Bohut Zaroori Fix)
+  // ✅ 2. Camera Start & Auto-Stop Logic (Error Proof)
   useEffect(() => {
     let isMounted = true;
     
@@ -33,6 +34,7 @@ const BarcodeScanner = ({ onScanSuccess, onClose }) => {
       const html5QrCode = new Html5Qrcode("reader");
       scannerRef.current = html5QrCode;
 
+      // Start scanning
       html5QrCode.start(
         { facingMode: "environment" },
         { 
@@ -41,30 +43,46 @@ const BarcodeScanner = ({ onScanSuccess, onClose }) => {
           aspectRatio: 1.0 
         },
         (decodedText) => {
-          // ✅ SCAN SUCCESSFUL
           if (!isMounted) return;
           
-          // Pehle camera foran band karein
-          html5QrCode.stop().then(() => {
-            onScanSuccess({ barcode: decodedText });
-            onClose();
-          }).catch((err) => {
-            console.error("Camera stop error:", err);
-            // Agar stop mein masla ho tab bhi barcode bhej dein
-            onScanSuccess({ barcode: decodedText });
-            onClose();
-          });
+          // ✅ FIX: Scanner band karne se pehle check karein ke woh chal raha hai
+          if (isScanningRef.current) {
+            isScanningRef.current = false; // Double scan rokne ke liye
+            
+            try {
+              html5QrCode.stop().then(() => {
+                onScanSuccess({ barcode: decodedText });
+                onClose();
+              }).catch((err) => {
+                // Agar stop mein error aaye (jaise pehle hi band ho), tab bhi barcode bhejein
+                console.log("Stop error handled:", err);
+                onScanSuccess({ barcode: decodedText });
+                onClose();
+              });
+            } catch (err) {
+              console.log("Stop catch error:", err);
+              onScanSuccess({ barcode: decodedText });
+              onClose();
+            }
+          }
         },
         (err) => { /* Scanning errors ignore karein */ }
-      ).catch(err => {
+      ).then(() => {
+        isScanningRef.current = true;
+      }).catch(err => {
         setError("Camera access denied. Please allow camera permissions.");
       });
 
-      // ✅ Cleanup: Jab component band ho ya mode change ho, camera stop karein
+      // Cleanup
       return () => {
         isMounted = false;
-        if (scannerRef.current) {
-          scannerRef.current.stop().catch(e => console.log("Cleanup error:", e));
+        if (scannerRef.current && isScanningRef.current) {
+          try {
+            scannerRef.current.stop().catch(e => console.log("Cleanup error:", e));
+          } catch (err) {
+            console.log("Cleanup catch:", err);
+          }
+          isScanningRef.current = false;
         }
       };
     }
@@ -118,12 +136,19 @@ const BarcodeScanner = ({ onScanSuccess, onClose }) => {
              </div>
           )}
 
-          {/* ✅ CAMERA MODE */}
+          {/* CAMERA MODE */}
           {isCameraMode && hasCamera ? (
             <div className="w-full">
               <div id="reader" className="w-full rounded-xl overflow-hidden bg-black min-h-[250px] max-h-[40vh]"></div>
               <button 
-                onClick={() => setIsCameraMode(false)} 
+                onClick={() => {
+                  setIsCameraMode(false);
+                  // Camera mode se bahar aate waqt stop karein
+                  if (scannerRef.current && isScanningRef.current) {
+                     scannerRef.current.stop().catch(e => console.log(e));
+                     isScanningRef.current = false;
+                  }
+                }} 
                 className="w-full mt-3 sm:mt-4 bg-slate-200 text-slate-700 font-bold py-2.5 rounded-lg text-sm"
               >
                 Switch to USB Scanner / Manual
@@ -131,7 +156,6 @@ const BarcodeScanner = ({ onScanSuccess, onClose }) => {
             </div>
           ) : (
             <>
-              {/* Scanner Graphic */}
               <div className="w-16 h-16 sm:w-24 sm:h-24 bg-teal-100 text-teal-600 rounded-full flex items-center justify-center mb-4 sm:mb-6 shrink-0">
                 <ScanLine size={32} className="sm:w-12 sm:h-12" />
               </div>
@@ -145,7 +169,6 @@ const BarcodeScanner = ({ onScanSuccess, onClose }) => {
                   : "Point your USB Barcode Scanner at the product."}
               </p>
 
-              {/* ✅ Sirf tab dikhega jab camera available ho */}
               {hasCamera && (
                 <button 
                   onClick={() => setIsCameraMode(true)}
@@ -155,7 +178,6 @@ const BarcodeScanner = ({ onScanSuccess, onClose }) => {
                 </button>
               )}
 
-              {/* USB Scanner / Manual Input */}
               <div className="w-full bg-white p-2.5 sm:p-3 rounded-xl border-2 border-teal-500 shadow-sm relative shrink-0">
                 <label className="text-[9px] sm:text-[10px] font-bold text-teal-600 uppercase mb-1 block">
                   {hasCamera ? "Or Type Manually" : "Waiting for USB Scanner..."}
