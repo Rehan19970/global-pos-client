@@ -6,6 +6,14 @@
     <link rel="icon" type="image/svg+xml" href="/logo.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>POSFlow - Enterprise POS</title>
+
+    <!-- ✅ Mobile Inspector (Eruda) -->
+    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+    <script>
+      if (window.location.search.includes('eruda=true')) {
+        eruda.init();
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
