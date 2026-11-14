@@ -10,7 +10,7 @@ const BarcodeScanner = ({ onScanSuccess, onClose }) => {
 
   const inputRef = useRef(null);
   const scannerRef = useRef(null);
-  const isScanningRef = useRef(false); // ✅ Tracking ke liye
+  const isScanningRef = useRef(false); 
 
   // ✅ 1. Check karein ke device mein camera available hai ya nahi
   useEffect(() => {
@@ -45,16 +45,14 @@ const BarcodeScanner = ({ onScanSuccess, onClose }) => {
         (decodedText) => {
           if (!isMounted) return;
           
-          // ✅ FIX: Scanner band karne se pehle check karein ke woh chal raha hai
           if (isScanningRef.current) {
-            isScanningRef.current = false; // Double scan rokne ke liye
+            isScanningRef.current = false; 
             
             try {
               html5QrCode.stop().then(() => {
                 onScanSuccess({ barcode: decodedText });
                 onClose();
               }).catch((err) => {
-                // Agar stop mein error aaye (jaise pehle hi band ho), tab bhi barcode bhejein
                 console.log("Stop error handled:", err);
                 onScanSuccess({ barcode: decodedText });
                 onClose();
@@ -88,8 +86,12 @@ const BarcodeScanner = ({ onScanSuccess, onClose }) => {
     }
   }, [isCameraMode, hasCamera, onScanSuccess, onClose]);
 
-  // ✅ 3. USB Scanner Input Focus
+  // ✅ 3. USB Scanner Input Focus (Sirf Desktop par)
   useEffect(() => {
+    // Mobile par keyboard khud na khule
+    const isMobileDevice = /android|iPad|iPhone|iPod/.test(navigator.userAgent) || window.innerWidth <= 768;
+    if (isMobileDevice) return;
+
     if (!isCameraMode && inputRef.current) {
       inputRef.current.focus();
     }
@@ -143,7 +145,6 @@ const BarcodeScanner = ({ onScanSuccess, onClose }) => {
               <button 
                 onClick={() => {
                   setIsCameraMode(false);
-                  // Camera mode se bahar aate waqt stop karein
                   if (scannerRef.current && isScanningRef.current) {
                      scannerRef.current.stop().catch(e => console.log(e));
                      isScanningRef.current = false;

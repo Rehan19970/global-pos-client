@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { 
   Search, ScanLine, Trash2, Plus, Minus, CreditCard, 
   Banknote, User, ShoppingCart, PauseCircle, PlayCircle, X, BookOpen, Printer, 
-  ArrowLeft, Package // ✅ Package yahan add karein
+  ArrowLeft, Package 
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import useCartStore from '../../store/cartStore';
@@ -28,7 +28,6 @@ const PosTerminal = () => {
   const [showScanner, setShowScanner] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   
-  // ✅ Mobile View Tab State ('products' ya 'cart')
   const [mobileTab, setMobileTab] = useState('products'); 
 
   const [heldSales, setHeldSales] = useState([]);
@@ -98,10 +97,15 @@ const PosTerminal = () => {
     fetchData();
   }, [selectedBranch]);
 
+  // ✅ FIX: Mobile par keyboard khud na khule
   useEffect(() => {
+    const isMobileDevice = /android|iPad|iPhone|iPod/.test(navigator.userAgent) || window.innerWidth <= 768;
+    
+    if (isMobileDevice) return; // Mobile par auto-focus band
+
     const focusInterval = setInterval(() => {
       const activeTag = document.activeElement?.tagName;
-      const isInputActive = activeTag === 'INPUT' || activeTag === 'TEXTAREA';
+      const isInputActive = activeTag === 'INPUT' || activeTag === 'TEXTAREA' || activeTag === 'SELECT';
       
       if (usbInputRef.current && !isInputActive) {
         usbInputRef.current.focus();
@@ -273,7 +277,7 @@ const PosTerminal = () => {
       setShowSplitModal(false);
 
       fetchData(); 
-      setMobileTab('products'); // Checkout ke baad mobile par wapas products tab par bhejein
+      setMobileTab('products');
 
     } catch (error) {
       const errorMsg = error.response?.data?.message || t('checkoutFailed');
@@ -359,7 +363,7 @@ const PosTerminal = () => {
         />
       )}
 
-      {/* 📱 MOBILE TABS (Sirf mobile par nazar aayenge) */}
+      {/* 📱 MOBILE TABS */}
       <div className="lg:hidden flex bg-white border-b border-slate-200 shrink-0">
         <button 
           onClick={() => setMobileTab('products')}
@@ -378,7 +382,6 @@ const PosTerminal = () => {
       {/* LEFT: PRODUCTS */}
       <div className={`flex-1 flex-col p-4 lg:p-6 min-w-0 border-r border-slate-200 h-full overflow-hidden ${mobileTab === 'products' ? 'flex' : 'hidden lg:flex'}`}>
         
-        {/* SEARCH BAR & SCANNER */}
         <div className="flex gap-2 lg:gap-4 mb-4 lg:mb-6 shrink-0">
           <div className="relative flex-1">
             <Search className="absolute left-3 lg:left-4 top-3 text-slate-400" size={18} />
@@ -417,7 +420,6 @@ const PosTerminal = () => {
           </div>
         </div>
 
-        {/* PRODUCT GRID - 2 cols mobile, 3 tablet, 4 desktop */}
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 lg:gap-4 overflow-y-auto pb-6 flex-1 content-start">
           {filteredProducts.map(product => (
             <div 
@@ -463,11 +465,9 @@ const PosTerminal = () => {
       {/* RIGHT: CART */}
       <div className={`w-full lg:w-[400px] bg-white flex-col shadow-[-10px_0_20px_-10px_rgba(0,0,0,0.05)] z-10 relative h-full ${mobileTab === 'cart' ? 'flex' : 'hidden lg:flex'}`}>
         
-        {/* HEADER */}
         <div className="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-white shrink-0">
           <div>
             <h2 className="text-base lg:text-lg font-bold text-slate-900 flex items-center gap-2">
-              {/* ✅ Mobile Back Button to Products */}
               <button onClick={() => setMobileTab('products')} className="lg:hidden p-1 -ml-2 text-slate-500 hover:bg-slate-100 rounded">
                 <ArrowLeft size={20} />
               </button>
@@ -485,7 +485,6 @@ const PosTerminal = () => {
           </div>
         </div>
 
-        {/* CUSTOMER SECTION */}
         <div className="px-4 py-2 bg-slate-50 border-b border-slate-100 flex items-center justify-between shrink-0">
           {selectedCustomer ? (
             <div className="flex justify-between items-center w-full">
@@ -505,14 +504,12 @@ const PosTerminal = () => {
           )}
         </div>
 
-        {/* CART ITEMS */}
         <div className="flex-1 overflow-y-auto p-3 space-y-2 min-h-0 bg-slate-50">
           {cart.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-slate-400">
               <ShoppingCart size={40} className="text-slate-200 mb-3" />
               <p className="font-medium text-sm text-slate-600">{t('cartEmpty')}</p>
               <p className="text-[10px] text-slate-400 mt-1">{t('scanBarcodeOrClick')}</p>
-              {/* Mobile View mein Add products button */}
               <button onClick={() => setMobileTab('products')} className="mt-4 lg:hidden bg-teal-50 text-teal-700 px-4 py-2 rounded-lg font-bold text-xs border border-teal-200">
                  Go to Products
               </button>
@@ -543,7 +540,6 @@ const PosTerminal = () => {
           )}
         </div>
 
-        {/* BILL / CHECKOUT */}
         <div className="p-4 bg-white border-t border-slate-200 rounded-t-3xl shrink-0 shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.05)] relative z-20">
           <div className="space-y-1.5 mb-4">
             <div className="flex justify-between text-slate-500 text-xs"><span>{t('subtotal')}</span><span>{fmt(subTotal)}</span></div>
